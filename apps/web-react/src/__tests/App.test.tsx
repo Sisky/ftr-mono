@@ -1,0 +1,173 @@
+/* @vitest-environment jsdom */
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom/vitest';
+
+type SnapshotRow = {
+  value: number;
+  count: number;
+};
+
+type Snapshot = {
+  running: boolean;
+  totalInputs: number;
+  top: SnapshotRow[];
+  lastUpdated: number;
+};
+
+type UseCounterWorkerResult = {
+  snapshot: Snapshot | null;
+  lastFib: number | null;
+  running: boolean;
+  inputNumber: (n: number) => void;
+  halt: () => void;
+  resume: () => void;
+  refresh: () => void;
+  quit: () => void;
+  setIntervalMs: (ms: number) => void;
+};
+
+import App from '../App.tsx';
+
+const useCounterWorkerMock = vi.fn();
+
+vi.mock('../hooks/useCounterWorker', () => ({
+  useCounterWorker: () => useCounterWorkerMock(),
+}));
+
+let mockInputNumber: ReturnType<typeof vi.fn>;
+let mockHalt: ReturnType<typeof vi.fn>;
+let mockResume: ReturnType<typeof vi.fn>;
+let mockRefresh: ReturnType<typeof vi.fn>;
+let mockQuit: ReturnType<typeof vi.fn>;
+let mockSetIntervalMs: ReturnType<typeof vi.fn>;
+
+const buildHookReturn = (overrides: Partial<UseCounterWorkerResult> = {},
+) => ({
+  snapshot: { running: true, totalInputs: 0, top: [], lastUpdated: Date.now() },
+  lastFib: null,
+  running: true,
+  inputNumber: mockInputNumber,
+  halt: mockHalt,
+  resume: mockResume,
+  refresh: mockRefresh,
+  quit: mockQuit,
+  setIntervalMs: mockSetIntervalMs,
+  ...overrides,
+});
+
+beforeEach(() => {
+  mockInputNumber = vi.fn();
+  mockHalt = vi.fn();
+  mockResume = vi.fn();
+  mockRefresh = vi.fn();
+  mockQuit = vi.fn();
+  mockSetIntervalMs = vi.fn();
+
+  useCounterWorkerMock.mockReset();
+  useCounterWorkerMock.mockReturnValue(buildHookReturn());
+});
+
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
+
+describe('App', () => {
+  it('renders the main heading', () => {
+    render(<App/>);
+
+    expect(
+      screen.getByRole('heading', { name: 'React + Web Worker (Counter)' })
+    ).toBeInTheDocument();
+  });
+
+  it('submits a valid integer and clears the input', () => {
+    render(<App/>);
+
+    const input = screen.getByPlaceholderText(/enter an integer/i) as HTMLInputElement;
+    const addButton = screen.getByRole('button', { name: /add/i });
+
+    fireEvent.change(input, { target: { value: '42' } });
+    fireEvent.click(addButton);
+
+    expect(mockInputNumber).toHaveBeenCalledWith(42);
+
+    expect(input.value).toBe('');
+
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('shows validation error and does not submit for non-integer input', () => {
+    render(<App/>);
+
+    const input = screen.getByPlaceholderText(/enter an integer/i);
+    const addButton = screen.getByRole('button', { name: /add/i });
+
+    fireEvent.change(input, { target: { value: 'abc' } });
+    fireEvent.click(addButton);
+
+    expect(mockInputNumber).not.toHaveBeenCalled();
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Please enter an integer (no decimals or letters).'
+    );
+  });
+
+  it('shows safe-integer validation error for unsafe integer value', () => {
+    render(<App/>);
+
+    const input = screen.getByPlaceholderText(/enter an integer/i);
+    const addButton = screen.getByRole('button', { name: /add/i });
+
+    // One above Number.MAX_SAFE_INTEGER
+    fireEvent.change(input, { target: { value: '9007199254740993' } });
+    fireEvent.click(addButton);
+
+    expect(mockInputNumber).not.toHaveBeenCalled();
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Value must be a safe integer.');
+  });
+
+  it('displays and auto-hides FIB toast when lastFib is provided', async () => {
+    useCounterWorkerMock.mockReturnValue(
+      buildHookReturn({
+        snapshot: { running: true, totalInputs: 1, top: [], lastUpdated: Date.now() },
+        lastFib: 21,
+      })
+    );
+
+    render(<App/>);
+
+    expect(screen.getByText('FIB: 21')).toBeInTheDocument();
+
+    await waitFor(
+      () => {
+        expect(screen.queryByText('FIB: 21')).not.toBeInTheDocument();
+      },
+      { timeout: 2000, interval: 50 }
+    );
+  });
+
+
+  it('handles a null snapshot from the worker (branch coverage)', () => {
+    // Force the hook to return no snapshot and not running
+    useCounterWorkerMock.mockReturnValue(
+      buildHookReturn({
+        snapshot: null,
+        running: false,
+      }),
+    );
+
+    render(<App/>);
+
+    // StatusBar should show halted, 0 total inputs, and "no last update"
+    const status = screen.getByText(/Status:/);
+    expect(status).toHaveTextContent('Status: Halted');
+    expect(status).toHaveTextContent('Total inputs: 0');
+    expect(status).toHaveTextContent('Last update:');
+
+    // FrequencyTable should fall back to [] and show the empty state
+    expect(screen.getByText(/No inputs yet\./i)).toBeInTheDocument();
+  });
+});
