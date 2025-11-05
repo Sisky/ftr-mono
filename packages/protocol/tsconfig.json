@@ -1,12 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "composite": true,
     "declaration": true,
-    "outDir": "dist",
-    "types": ["vitest/globals", "node"]
+    "declarationMap": true,
+    "outDir": "dist"
   },
-  "include": ["src", "**/*.test.ts"]
+  "include": ["src"]
 }

@@ -1,15 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
+    "composite": true,
     "declaration": true,
-    "outDir": "dist",
-    "moduleResolution": "Bundler"
+    "declarationMap": true,
+    "outDir": "dist"
   },
-  "include": [
-    "src",
-    "**/*.test.ts",
-    "**/*.test.tsx"
-  ]
+  "include": ["src"]
 }

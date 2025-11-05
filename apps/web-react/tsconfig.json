@@ -1,7 +1,14 @@
 {
-  "files": [],
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  },
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+    { "path": "../../packages/domain" },
+    { "path": "../../packages/protocol" },
+    { "path": "../../packages/scheduler" }
+  ],
+  "include": ["src"]
 }

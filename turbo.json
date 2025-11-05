@@ -6,7 +6,12 @@
       "outputs": ["dist/**", "build/**"]
     },
     "dev": { "cache": false, "persistent": true },
-    "test": { "dependsOn": ["^build"] },
+    "test": {
+      "dependsOn": ["transit"]
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
     "coverage": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
