@@ -12,7 +12,7 @@ export default function App() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [intervalStr, setIntervalStr] = useState('5');
 
-  const { snapshot, lastFib, inputNumber, halt, resume, refresh, quit, running, setIntervalMs } = useCounterWorker();
+  const { snapshot, lastFib, lastFibTick, inputNumber, halt, resume, refresh, quit, running, setIntervalMs } = useCounterWorker();
 
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function App() {
       const t = setTimeout(() => setFibToast(null), 1500);
       return () => clearTimeout(t);
     }
-  }, [lastFib]);
+  }, [lastFibTick, lastFib]);
 
   const submit = () => {
     const str = input.trim();

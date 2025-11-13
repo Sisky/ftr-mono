@@ -6,7 +6,7 @@ import { createIntervalScheduler, type IntervalScheduler } from '@ftr-mono/sched
 const counter = new Counter();
 const fibonacci = makeFibonacciSet(1000);
 
-const SNAPSHOT_INTERVAL_MS = 5000;
+const SNAPSHOT_INTERVAL_MS = 1000;
 const SNAPSHOT_TOP_LIMIT = 50;
 
 // eslint-disable-next-line prefer-const -- must be let because it's assigned after postSnapshot is defined
