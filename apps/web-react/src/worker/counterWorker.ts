@@ -7,7 +7,6 @@ const counter = new Counter();
 const fibonacci = makeFibonacciSet(1000);
 
 const SNAPSHOT_INTERVAL_MS = 1000;
-const SNAPSHOT_TOP_LIMIT = 50;
 
 // eslint-disable-next-line prefer-const -- must be let because it's assigned after postSnapshot is defined
 let scheduler: IntervalScheduler;
@@ -17,7 +16,7 @@ function postSnapshot(): void {
     // scheduler is initialized before any calls to postSnapshot; using direct access removes an untestable branch
     running: scheduler.running,
     totalInputs: counter.total,
-    top: counter.snapshot(SNAPSHOT_TOP_LIMIT),
+    top: counter.snapshot(),
     lastUpdated: Date.now(),
   };
   postMessage({ type: 'SNAPSHOT', payload } as WorkerEvent);
