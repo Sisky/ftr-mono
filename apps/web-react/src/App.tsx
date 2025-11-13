@@ -10,7 +10,7 @@ export default function App() {
   const [input, setInput] = useState('');
   const [fibToast, setFibToast] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [intervalStr, setIntervalStr] = useState('5000');
+  const [intervalStr, setIntervalStr] = useState('5');
 
   const { snapshot, lastFib, inputNumber, halt, resume, refresh, quit, running, setIntervalMs } = useCounterWorker();
 
