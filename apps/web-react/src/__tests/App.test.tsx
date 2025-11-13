@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
 type SnapshotRow = {
@@ -18,6 +18,8 @@ type Snapshot = {
 type UseCounterWorkerResult = {
   snapshot: Snapshot | null;
   lastFib: number | null;
+  lastFibTick: number;
+  quitAckTick: number;
   running: boolean;
   inputNumber: (n: number) => void;
   halt: () => void;
@@ -46,6 +48,8 @@ const buildHookReturn = (overrides: Partial<UseCounterWorkerResult> = {},
 ) => ({
   snapshot: { running: true, totalInputs: 0, top: [], lastUpdated: Date.now() },
   lastFib: null,
+  lastFibTick: 0,
+  quitAckTick: 0,
   running: true,
   inputNumber: mockInputNumber,
   halt: mockHalt,
@@ -169,5 +173,66 @@ describe('App', () => {
 
     // FrequencyTable should fall back to [] and show the empty state
     expect(screen.getByText(/No inputs yet\./i)).toBeInTheDocument();
+  });
+});
+
+describe('App farewell overlay', () => {
+  it('does not show the farewell overlay when quitAckTick is 0', () => {
+    useCounterWorkerMock.mockReturnValue(
+      buildHookReturn({
+        quitAckTick: 0,
+        snapshot: { running: true, totalInputs: 2, top: [], lastUpdated: Date.now() },
+      })
+    );
+
+    render(<App />);
+
+    expect(screen.queryByText('Farewell!')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'OK' })).toBeNull();
+  });
+
+  it('shows the farewell overlay when quitAckTick > 0 and OK triggers reload', () => {
+    const reloadSpy = vi.fn();
+
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, reload: reloadSpy },
+      writable: true,
+    });
+
+    useCounterWorkerMock.mockReturnValue(
+      buildHookReturn({
+        quitAckTick: 1,
+        snapshot: {
+          running: false,
+          totalInputs: 3,
+          top: [
+            { value: 5, count: 2 },
+            { value: 1, count: 1 },
+          ],
+          lastUpdated: Date.now(),
+        },
+      })
+    );
+
+    render(<App />);
+
+    const farewellHeading = screen.getByText('Farewell!');
+    expect(farewellHeading).toBeInTheDocument();
+    expect(screen.getByText(/numbers you entered/i)).toBeInTheDocument();
+
+    const card = farewellHeading.closest('div') as HTMLElement;
+    const table = within(card).getByRole('table');
+    const rows = within(table).getAllByRole('row');
+
+    expect(rows.length).toBe(3);
+    expect(rows[1]).toHaveTextContent('1');
+    expect(rows[1]).toHaveTextContent('5');
+    expect(rows[1]).toHaveTextContent('2');
+    expect(rows[2]).toHaveTextContent('2');
+    expect(rows[2]).toHaveTextContent('1');
+    expect(rows[2]).toHaveTextContent('1');
+
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+    expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
 });

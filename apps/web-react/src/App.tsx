@@ -62,6 +62,8 @@ export default function App() {
     }
   }
 
+  const farewellTable = <FrequencyTable rows={snapshot?.top ?? []} />;
+
   return (
     <div style={{ maxWidth: 900, margin: '40px auto', padding: 16 }}>
       <h1>React + Web Worker (Counter)</h1>
@@ -108,8 +110,8 @@ export default function App() {
           <div style={{ background: '#fff', padding: 24, borderRadius: 12, width: 'min(680px, 90vw)' }}>
             <h2 style={{ marginTop: 0 }}>Farewell!</h2>
             <p>Here are the numbers you entered and their frequencies:</p>
-            <div style={{ maxHeight: 320, overflow: 'auto', marginBottom: 16 }}>
-              <FrequencyTable rows={snapshot?.top ?? []} />
+            <div style={{ maxHeight: 320, overflow: 'auto', marginBottom: 16 }} data-testid="farewell-frequency">
+              {farewellTable}
             </div>
             <p>The application will restart when you press OK.</p>
             <div style={{ textAlign: 'right' }}>

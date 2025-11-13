@@ -119,10 +119,7 @@ describe('useCounterWorker', () => {
     expect(result.current.lastFib).toBe(1);
   });
 
-  it('handles QUIT_ACK by resetting state and requesting a fresh snapshot', () => {
-    const fixedNow = 111111;
-    vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
-
+  it('handles QUIT_ACK by signaling quitAckTick without requesting a fresh snapshot', () => {
     const { result } = renderHook(() => useCounterWorker());
     const worker = MockWorker.instances[0]!;
 
@@ -148,27 +145,29 @@ describe('useCounterWorker', () => {
 
     worker.postMessage.mockClear();
 
+    const prevTick = result.current.quitAckTick;
+
     act(() => {
       worker.onmessage?.({
         data: { type: 'QUIT_ACK' },
       } as MessageEvent<WorkerEvent>);
     });
 
+    // No changes to snapshot or lastFib here; only quitAckTick increments
     expect(result.current.snapshot).toEqual({
-      running: false,
-      totalInputs: 0,
+      running: true,
+      totalInputs: 10,
       top: [],
-      lastUpdated: fixedNow,
+      lastUpdated: 999,
     });
-    expect(result.current.lastFib).toBeNull();
+    expect(result.current.lastFib).toBe(21);
+    expect(result.current.quitAckTick).toBe(prevTick + 1);
 
-    expect(worker.postMessage).toHaveBeenCalledWith({ type: 'REQUEST_SNAPSHOT' });
+    // Should not request a new snapshot automatically
+    expect(worker.postMessage).not.toHaveBeenCalled();
   });
 
-  it('quit() resets snapshot & lastFib and sends QUIT', () => {
-    const fixedNow = 222222;
-    vi.spyOn(Date, 'now').mockReturnValue(fixedNow);
-
+  it('quit() sends QUIT without locally resetting state', () => {
     const { result } = renderHook(() => useCounterWorker());
     const worker = MockWorker.instances[0]!;
 
@@ -190,13 +189,15 @@ describe('useCounterWorker', () => {
       result.current.quit();
     });
 
+    // State should remain unchanged immediately after calling quit();
+    // the worker will send a final snapshot followed by QUIT_ACK.
     expect(result.current.snapshot).toEqual({
-      running: false,
-      totalInputs: 0,
+      running: true,
+      totalInputs: 7,
       top: [],
-      lastUpdated: fixedNow,
+      lastUpdated: 888,
     });
-    expect(result.current.lastFib).toBeNull();
+    expect(result.current.lastFib).toBe(13);
 
     expect(worker.postMessage).toHaveBeenCalledWith({ type: 'QUIT' });
   });
