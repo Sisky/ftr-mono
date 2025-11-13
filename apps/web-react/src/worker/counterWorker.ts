@@ -49,7 +49,11 @@ self.addEventListener('message', (e: MessageEvent<Command>) => {
             break;
         }
         case 'QUIT': {
-            scheduler.stop()
+            // Stop the scheduler so running=false is reflected in the final snapshot
+            scheduler.stop();
+            // Send a final snapshot with the current frequency table before clearing
+            postSnapshot();
+            // Now clear the internal state and acknowledge quit
             counter.clear();
             postMessage({ type: 'QUIT_ACK' } as WorkerEvent);
             break;

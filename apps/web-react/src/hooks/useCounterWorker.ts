@@ -7,6 +7,8 @@ export function useCounterWorker() {
   const [lastFib, setLastFib] = useState<number | null>(null);
   // React won't rerender primitives that stay the same. so this is needed to make sure every fib shows the alert even when duped.
   const [lastFibTick, setLastFibTick] = useState(0);
+  // Signal used to indicate that the worker acknowledged quit
+  const [quitAckTick, setQuitAckTick] = useState(0);
 
   useEffect(() => {
     const worker = new Worker(new URL('../worker/counterWorker.ts', import.meta.url), { type: 'module' });
@@ -24,10 +26,9 @@ export function useCounterWorker() {
           setLastFibTick((x) => x + 1);
           break;
         case 'QUIT_ACK':
-          setSnapshot({ running: false, totalInputs: 0, top: [], lastUpdated: Date.now() });
-          setLastFib(null);
-          setLastFibTick((x) => x + 1);
-          worker.postMessage({ type: 'REQUEST_SNAPSHOT' } satisfies Command);
+          // Worker already posted a final snapshot before acknowledging quit.
+          // Signal to the UI that quit has completed so it can show farewell UI.
+          setQuitAckTick((x) => x + 1);
           break;
       }
     };
@@ -48,6 +49,7 @@ export function useCounterWorker() {
     snapshot,
     lastFib,
     lastFibTick,
+    quitAckTick,
     running: snapshot?.running ?? false,
     inputNumber: (n: number) => send({ type: 'INPUT_NUMBER', value: n }),
     halt: () => send({ type: 'HALT' }),
@@ -55,10 +57,8 @@ export function useCounterWorker() {
     refresh: () => send({ type: 'REQUEST_SNAPSHOT' }),
     setIntervalMs: (ms: number) => send({ type: 'SET_INTERVAL', ms }),
     quit: () => {
-      setSnapshot({ running: false, totalInputs: 0, top: [], lastUpdated: Date.now() });
-      setLastFib(null);
-      setLastFibTick((x) => x + 1);
+      // sk the worker to quit. It will emit a final snapshot followed by QUIT_ACK.
       send({ type: 'QUIT' });
     },
-  }), [snapshot, lastFib, lastFibTick, send]);
+  }), [snapshot, lastFib, lastFibTick, quitAckTick, send]);
 }
