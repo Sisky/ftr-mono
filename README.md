@@ -1,9 +1,40 @@
-## CI
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Open%20App-2ea44f?logo=amazon-aws&logoColor=white)](https://dqctwz7poptdq.cloudfront.net/)
+
+# CI
 
 | Check          | Status                                                                                                                |
 |----------------|-----------------------------------------------------------------------------------------------------------------------|
 | Deploy & tests | ![Deploy & Tests](https://github.com/Sisky/ftr-mono/actions/workflows/deploy-s3.yml/badge.svg)                        |
 | Coverage       | [![Coverage](https://codecov.io/gh/Sisky/ftr-mono/branch/main/graph/badge.svg)](https://codecov.io/gh/Sisky/ftr-mono) |
+
+# Installation
+
+Follow these steps to get the project running locally.
+
+Prerequisites
+- Node.js 20+
+- pnpm 10+ 
+
+Setup
+1) Clone the repository
+   - git clone https://github.com/Sisky/ftr-mono.git
+   - cd ftr-mono
+2) Install dependencies (workspace-aware)
+   - pnpm install
+3) Build
+   - pnpm build        
+4) Start development
+   - pnpm dev
+5) Run tests
+   - pnpm test          
+7) Lint
+   - pnpm lint
+8) Coverage
+   - pnpm report
+
+Notes
+- This is a pnpm workspace managed by Turborepo. Root scripts fan out to packages/apps.
+- If you don't have pnpm installed: npm i -g pnpm
 
 ### You have a new requirement to implement for your application: its logic should stay exactly the same but it will need to have a different user interface (e.g. if you wrote a web app, a different UI may be a REPL). Please describe how you would go about implementing this new UI in your application? Would you need to restructure your solution in any way?
 
