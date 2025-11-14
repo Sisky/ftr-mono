@@ -7,6 +7,10 @@ interface IntervalControlProps {
 export default function IntervalControl(props: IntervalControlProps) {
   const { intervalStr, setIntervalStr, setIntervalMs } = props;
 
+  const n = Number(intervalStr);
+  const isInteger = Number.isInteger(n);
+  const isValid = Number.isFinite(n) && isInteger && n >= 1;
+
   return (
     <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
       <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#444' }}>
