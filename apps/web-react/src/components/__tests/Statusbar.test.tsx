@@ -11,7 +11,7 @@ const baseProps = {
   running: true,
   totalInputs: 0,
   lastUpdated: null as number | null,
-  fibToast: null as number | null,
+  fibToast: null as string | null,
 };
 
 describe('StatusBar', () => {
@@ -48,7 +48,7 @@ describe('StatusBar', () => {
   });
 
   it('renders FIB pill when fibToast has a value', () => {
-    render(<StatusBar {...baseProps} fibToast={1}/>);
+    render(<StatusBar {...baseProps} fibToast={'1'}/>);
 
     expect(screen.getByText('FIB: 1')).toBeInTheDocument();
   });

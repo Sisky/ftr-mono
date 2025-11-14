@@ -14,7 +14,7 @@ export type Command =
     | { type: 'HALT' }
     | { type: 'RESUME' }
     | { type: 'QUIT' }
-    | { type: 'INPUT_NUMBER'; value: number }
+    | { type: 'INPUT_NUMBER'; value: bigint }
     | { type: 'REQUEST_SNAPSHOT' }
     | { type: 'SET_INTERVAL'; ms: number };
 
@@ -40,5 +40,5 @@ export type Snapshot = {
  */
 export type WorkerEvent =
     | { type: 'SNAPSHOT'; payload: Snapshot }
-    | { type: 'FIB_ALERT'; value: number }
+    | { type: 'FIB_ALERT'; value: bigint }
     | { type: 'QUIT_ACK' };

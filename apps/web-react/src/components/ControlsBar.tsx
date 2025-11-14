@@ -2,7 +2,7 @@ import React from 'react';
 
 interface ControlsBarProps {
   inputRef: React.RefObject<HTMLInputElement | null>;
-  input: string;
+  input: string | bigint;
   setInput: (value: string) => void;
   onSubmit: () => void;
   running: boolean;
@@ -19,7 +19,7 @@ export default function ControlsBar(props: ControlsBarProps) {
     <div style={{ display: 'flex', gap: 8, marginBottom: 4, alignItems: 'center' }}>
       <input
         ref={inputRef}
-        value={input}
+        value={String(input)}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
         placeholder="Enter an integer…"

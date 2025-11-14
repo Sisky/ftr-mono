@@ -10,8 +10,8 @@ function acceptsDomainCountRow(_row: DomainCountRow) { /* noop */ }
 
 describe('@ftr-mono/protocol types', () => {
     it('CountRow re-exports the domain CountRow shape and is mutually assignable', () => {
-        const domainRow: DomainCountRow = { value: 42, count: 3 };
-        const protocolRow: CountRow = { value: 1, count: 2 };
+        const domainRow: DomainCountRow = { value: 42n, count: 3 };
+        const protocolRow: CountRow = { value: 1n, count: 2 };
 
         acceptsCountRow(domainRow);
         acceptsDomainCountRow(protocolRow);
@@ -25,7 +25,7 @@ describe('@ftr-mono/protocol types', () => {
         const halt: Command = { type: 'HALT' };
         const resume: Command = { type: 'RESUME' };
         const quit: Command = { type: 'QUIT' };
-        const input: Command = { type: 'INPUT_NUMBER', value: 123 };
+        const input: Command = { type: 'INPUT_NUMBER', value: 123n };
         const request: Command = { type: 'REQUEST_SNAPSHOT' };
         const setIntervalCmd: Command = { type: 'SET_INTERVAL', ms: 250 };
 
@@ -56,8 +56,8 @@ describe('@ftr-mono/protocol types', () => {
             running: true,
             totalInputs: 5,
             top: [
-                { value: 2, count: 3 },
-                { value: 1, count: 2 },
+                { value: 2n, count: 3 },
+                { value: 1n, count: 2 },
             ],
             lastUpdated: Date.now(),
         };
@@ -80,11 +80,11 @@ describe('@ftr-mono/protocol types', () => {
                 lastUpdated: 0,
             },
         };
-        const fibEvt: WorkerEvent = { type: 'FIB_ALERT', value: 34 };
+        const fibEvt: WorkerEvent = { type: 'FIB_ALERT', value: 34n };
         const quitAck: WorkerEvent = { type: 'QUIT_ACK' };
 
         expect(snapEvt.type).toBe('SNAPSHOT');
-        expect(fibEvt.value).toBe(34);
+        expect(fibEvt.value).toBe(34n);
         expect(quitAck.type).toBe('QUIT_ACK');
 
         // invalid variants (compile-time only)

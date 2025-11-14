@@ -4,7 +4,7 @@ import type { Command, WorkerEvent, Snapshot } from '@ftr-mono/protocol';
 export function useCounterWorker() {
   const workerRef = useRef<Worker | null>(null);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
-  const [lastFib, setLastFib] = useState<number | null>(null);
+  const [lastFib, setLastFib] = useState<bigint | null>(null);
   // React won't rerender primitives that stay the same. so this is needed to make sure every fib shows the alert even when duped.
   const [lastFibTick, setLastFibTick] = useState(0);
   // Signal used to indicate that the worker acknowledged quit
@@ -51,7 +51,7 @@ export function useCounterWorker() {
     lastFibTick,
     quitAckTick,
     running: snapshot?.running ?? false,
-    inputNumber: (n: number) => send({ type: 'INPUT_NUMBER', value: n }),
+    inputNumber: (n: bigint) => send({ type: 'INPUT_NUMBER', value: n }),
     halt: () => send({ type: 'HALT' }),
     resume: () => send({ type: 'RESUME' }),
     refresh: () => send({ type: 'REQUEST_SNAPSHOT' }),

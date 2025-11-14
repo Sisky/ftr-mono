@@ -19,8 +19,8 @@ describe('FrequencyTable', () => {
 
   it('renders a table with headers and rows when data is provided', () => {
     const rows = [
-      { value: 5, count: 2 },
-      { value: 7, count: 3 },
+      { value: 5n, count: 2 },
+      { value: 7n, count: 3 },
     ];
 
     render(<FrequencyTable rows={rows}/>);

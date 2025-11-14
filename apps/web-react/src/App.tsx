@@ -8,7 +8,7 @@ import StatusBar from './components/StatusBar';
 
 export default function App() {
   const [input, setInput] = useState('');
-  const [fibToast, setFibToast] = useState<number | null>(null);
+  const [fibToast, setFibToast] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [intervalStr, setIntervalStr] = useState('1');
 
@@ -25,7 +25,7 @@ export default function App() {
 
   useEffect(() => {
     if (lastFib != null) {
-      setFibToast(lastFib);
+      setFibToast(lastFib.toString());
       const t = setTimeout(() => setFibToast(null), 1500);
       return () => clearTimeout(t);
     }
@@ -39,14 +39,17 @@ export default function App() {
       return;
     }
 
-    const num = Number(str);
-
-    if (Number.isSafeInteger(num)) {
-      inputNumber(num);
-      // Clear only on successful submission
-      setInput('');
-      inputRef.current?.focus();
+    let big: bigint;
+    try {
+      big = BigInt(str);
+    } catch {
+      return;
     }
+
+    inputNumber(big);
+    // Clear only on successful submission
+    setInput('');
+    inputRef.current?.focus();
   };
 
   const s = input.trim();
@@ -55,9 +58,11 @@ export default function App() {
     if (!/^-?\d+$/.test(s)) {
       validationMsg = 'Please enter an integer (no decimals or letters).';
     } else {
-      const n = Number(s);
-      if (!Number.isSafeInteger(n)) {
-        validationMsg = 'Value must be a safe integer.';
+      // Ensure it's a valid BigInt representation
+      try {
+        BigInt(s);
+      } catch {
+        validationMsg = 'Please enter a valid integer value.';
       }
     }
   }

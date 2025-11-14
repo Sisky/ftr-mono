@@ -118,19 +118,22 @@ describe('App', () => {
     );
   });
 
-  it('shows safe-integer validation error for unsafe integer value', () => {
+  it('accepts large integers (beyond safe integer) and submits', () => {
     render(<App/>);
 
-    const input = screen.getByPlaceholderText(/enter an integer/i);
+    const input = screen.getByPlaceholderText(/enter an integer/i) as HTMLInputElement;
     const addButton = screen.getByRole('button', { name: /add/i });
 
     // One above Number.MAX_SAFE_INTEGER
     fireEvent.change(input, { target: { value: '9007199254740993' } });
     fireEvent.click(addButton);
 
-    expect(mockInputNumber).not.toHaveBeenCalled();
+    // For now the UI sends Number(str) downstream
+    expect(mockInputNumber).toHaveBeenCalledWith(Number('9007199254740993'));
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Value must be a safe integer.');
+    // Input clears on success and no alert is shown
+    expect(input.value).toBe('');
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('displays and auto-hides FIB toast when lastFib is provided', async () => {

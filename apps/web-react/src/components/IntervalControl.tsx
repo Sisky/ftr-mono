@@ -44,8 +44,8 @@ export default function IntervalControl(props: IntervalControlProps) {
             const v = e.target.value;
             setIntervalStr(v);
             const n2 = Number(v);
-            if (Number.isFinite(n2) && Number.isInteger(n2) && n2 >= 1) {
-              // Convert seconds to milliseconds for the worker
+            if (Number.isFinite(n2) && n2 >= 1) {
+              // Convert seconds to milliseconds for the worker (floor fractional seconds)
               setIntervalMs(Math.floor(n2 * 1000));
             }
           }}

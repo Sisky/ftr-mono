@@ -59,9 +59,9 @@ self.addEventListener('message', (e: MessageEvent<Command>) => {
             break;
         }
         case 'INPUT_NUMBER': {
-            if (Number.isInteger(cmd.value)) {
+            if (typeof cmd.value === 'bigint') {
                 counter.add(cmd.value);
-                if (fibonacci.has(BigInt(cmd.value))) {
+                if (fibonacci.has(cmd.value)) {
                     postMessage({ type: 'FIB_ALERT', value: cmd.value } as WorkerEvent);
                 }
             }

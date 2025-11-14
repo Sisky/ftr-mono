@@ -65,7 +65,7 @@ describe('useCounterWorker', () => {
     worker.postMessage.mockClear();
 
     act(() => {
-      result.current.inputNumber(42);
+      result.current.inputNumber(42n);
       result.current.halt();
       result.current.resume();
       result.current.refresh();
@@ -74,7 +74,7 @@ describe('useCounterWorker', () => {
 
     expect(worker.postMessage).toHaveBeenNthCalledWith(1, {
       type: 'INPUT_NUMBER',
-      value: 42,
+      value: 42n,
     });
     expect(worker.postMessage).toHaveBeenNthCalledWith(2, { type: 'HALT' });
     expect(worker.postMessage).toHaveBeenNthCalledWith(3, { type: 'RESUME' });
@@ -112,11 +112,11 @@ describe('useCounterWorker', () => {
 
     act(() => {
       worker.onmessage?.({
-        data: { type: 'FIB_ALERT', value: 1 },
-      } as MessageEvent<WorkerEvent>);
+        data: { type: 'FIB_ALERT', value: 1n },
+      } as unknown as MessageEvent<WorkerEvent>);
     });
 
-    expect(result.current.lastFib).toBe(1);
+    expect(result.current.lastFib).toBe(1n);
   });
 
   it('handles QUIT_ACK by signaling quitAckTick without requesting a fresh snapshot', () => {
@@ -131,8 +131,8 @@ describe('useCounterWorker', () => {
         },
       } as unknown as MessageEvent<WorkerEvent>);
       worker.onmessage?.({
-        data: { type: 'FIB_ALERT', value: 21 },
-      } as MessageEvent<WorkerEvent>);
+        data: { type: 'FIB_ALERT', value: 21n },
+      } as unknown as MessageEvent<WorkerEvent>);
     });
 
     expect(result.current.snapshot).toEqual({
@@ -141,7 +141,7 @@ describe('useCounterWorker', () => {
       top: [],
       lastUpdated: 999,
     });
-    expect(result.current.lastFib).toBe(21);
+    expect(result.current.lastFib).toBe(21n);
 
     worker.postMessage.mockClear();
 
@@ -179,8 +179,8 @@ describe('useCounterWorker', () => {
         },
       } as unknown as MessageEvent<WorkerEvent>);
       worker.onmessage?.({
-        data: { type: 'FIB_ALERT', value: 13 },
-      } as MessageEvent<WorkerEvent>);
+        data: { type: 'FIB_ALERT', value: 13n },
+      } as unknown as MessageEvent<WorkerEvent>);
     });
 
     worker.postMessage.mockClear();
@@ -197,7 +197,7 @@ describe('useCounterWorker', () => {
       top: [],
       lastUpdated: 888,
     });
-    expect(result.current.lastFib).toBe(13);
+    expect(result.current.lastFib).toBe(13n);
 
     expect(worker.postMessage).toHaveBeenCalledWith({ type: 'QUIT' });
   });

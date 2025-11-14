@@ -22,9 +22,9 @@ export default function FrequencyTable(props: FrequencyTableProps) {
       </thead>
       <tbody>
       {rows.map((r, i) => (
-        <tr key={r.value}>
+        <tr key={r.value.toString()}>
           <td>{i + 1}</td>
-          <td>{r.value}</td>
+          <td>{r.value.toString()}</td>
           <td style={{ textAlign: 'right' }}>{r.count}</td>
         </tr>
       ))}

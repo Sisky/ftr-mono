@@ -2,7 +2,7 @@ interface StatusBarProps {
   running: boolean;
   totalInputs: number;
   lastUpdated: number | null;
-  fibToast: number | null;
+  fibToast: string | null;
 }
 
 export default function StatusBar(props: StatusBarProps) {

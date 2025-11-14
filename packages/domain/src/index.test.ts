@@ -4,57 +4,57 @@ import { describe, expect, test } from 'vitest';
 describe('Counter', () => {
   test('counts and snapshots', () => {
     const c = new Counter();
-    [3, 3, 2, 5, 3, 2].forEach(n => c.add(n));
+    [3n, 3n, 2n, 5n, 3n, 2n].forEach(n => c.add(n));
     const rows = c.snapshot();
     expect(rows).toEqual([
-      { value: 3, count: 3 },
-      { value: 2, count: 2 },
-      { value: 5, count: 1 },
+      { value: 3n, count: 3 },
+      { value: 2n, count: 2 },
+      { value: 5n, count: 1 },
     ]);
     expect(c.total).toBe(6);
   });
 
   test('limit handling', () => {
     const c = new Counter();
-    [1, 2, 2, 3, 3, 3].forEach(n => c.add(n));
-    expect(c.snapshot(2).map(r => r.value)).toEqual([3, 2]);
+    [1n, 2n, 2n, 3n, 3n, 3n].forEach(n => c.add(n));
+    expect(c.snapshot(2).map(r => r.value)).toEqual([3n, 2n]);
     expect(c.snapshot(0)).toEqual([]);
     expect(c.snapshot(NaN).length).toBe(3);
   });
 
   test('get() returns 0 for unseen values', () => {
     const c = new Counter();
-    expect(c.get(42)).toBe(0);
+    expect(c.get(42n)).toBe(0);
   });
 
   test('clear() empties counts and resets total', () => {
     const c = new Counter();
-    [1, 1, 2].forEach(n => c.add(n));
+    [1n, 1n, 2n].forEach(n => c.add(n));
     expect(c.total).toBe(3);
     expect(c.snapshot().length).toBe(2);
     c.clear();
     expect(c.total).toBe(0);
     expect(c.snapshot()).toEqual([]);
-    expect(c.get(1)).toBe(0);
+    expect(c.get(1n)).toBe(0);
   });
 
   test('snapshot sorting tie-breaker by value asc when counts equal', () => {
     const c = new Counter();
     // Make 2 and 3 have same count
-    [3, 2, 3, 2].forEach(n => c.add(n));
+    [3n, 2n, 3n, 2n].forEach(n => c.add(n));
     const rows = c.snapshot();
     expect(rows).toEqual([
-      { value: 2, count: 2 },
-      { value: 3, count: 2 },
+      { value: 2n, count: 2 },
+      { value: 3n, count: 2 },
     ]);
   });
 
   test('snapshot limit: negative => [], > total => all, undefined => all', () => {
     const c = new Counter();
-    [1, 2, 2, 3].forEach(n => c.add(n));
+    [1n, 2n, 2n, 3n].forEach(n => c.add(n));
     expect(c.snapshot(-5)).toEqual([]);
     const all = c.snapshot(undefined);
-    expect(all.map(r => r.value)).toEqual([2, 1, 3]);
+    expect(all.map(r => r.value)).toEqual([2n, 1n, 3n]);
     const big = c.snapshot(999);
     expect(big).toEqual(all);
   });

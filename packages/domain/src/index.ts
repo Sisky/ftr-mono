@@ -1,4 +1,4 @@
-export type CountRow = { value: number; count: number; }
+export type CountRow = { value: bigint; count: number; }
 
 /**
  * Build a Set containing the first `count` Fibonacci numbers.
@@ -40,7 +40,7 @@ export function makeFibonacciSet(count: number = 1000): Set<bigint> {
 }
 
 export class Counter {
-    private counts: Map<number, number> = new Map();
+    private counts: Map<bigint, number> = new Map();
 
     public total: number = 0;
 
@@ -48,7 +48,7 @@ export class Counter {
      * @param value to count.
      * @returns The updated count for that value.
      */
-    add(value: number): number {
+    add(value: bigint): number {
         const prev = this.counts.get(value) ?? 0;
         const next = prev + 1;
         this.counts.set(value, next);
@@ -60,7 +60,7 @@ export class Counter {
      * @param value to check.
      * @returns Count of that value, 0 if not there.
      */
-    get(value: number): number | undefined {
+    get(value: bigint): number | undefined {
         return this.counts.get(value) ?? 0;
     }
 
@@ -112,7 +112,10 @@ export class Counter {
                 return rightCount - leftCount;
             }
 
-            return leftValue - rightValue;
+            // BigInt comparison: cannot subtract; use conditional
+            if (leftValue < rightValue) return -1;
+            if (leftValue > rightValue) return 1;
+            return 0;
         });
 
         const visiblePairs = clampedLimit >= total ? pairs : pairs.slice(0, clampedLimit);
