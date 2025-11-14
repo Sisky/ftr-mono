@@ -3,22 +3,24 @@ export type CountRow = { value: number; count: number; }
 /**
  * Build a Set containing the first `count` Fibonacci numbers.
  *
+ * - Uses BigInt internally for exact arithmetic to avoid precision loss.
  * - The Set is used for O(1) membership checks.
  * - For count <= 0, returns an empty set.
  *
  * @param count Number of Fibonacci terms to generate (defaults to 1000).
- * @returns A Set<number> containing the first `count` Fibonacci values.
+ * @returns A Set<bigint> of Fibonacci value.
  */
-export function makeFibonacciSet(count: number = 1000): Set<number> {
-    const fibNumbers = new Set<number>();
+export function makeFibonacciSet(count: number = 1000): Set<bigint> {
+    const fibNumbers = new Set<bigint>();
 
     if (!Number.isFinite(count) || count <= 0) {
         return fibNumbers;
     }
 
-    let prev = 0;
-    let curr = 1;
+    let prev = 0n;
+    let curr = 1n;
 
+    // always add 0
     fibNumbers.add(prev);
 
     if (count === 1) {
@@ -30,7 +32,6 @@ export function makeFibonacciSet(count: number = 1000): Set<number> {
     for (let generated = 2; generated <= count; generated++) {
         const next = prev + curr;
         fibNumbers.add(next);
-
         prev = curr;
         curr = next;
     }
