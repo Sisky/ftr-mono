@@ -40,7 +40,7 @@ function setupMockWorkerScope() {
     postMessage: (msg: WorkerEvent) => {
       messages.push(msg);
     },
-  } as unknown as WorkerGlobalScope;
+  } as unknown as DedicatedWorkerGlobalScope;
 
   // install globals expected by the worker module
   // self.addEventListener(...) is used for subscribing
