@@ -50,8 +50,7 @@ function setupMockWorkerScope() {
   Object.defineProperty(globalThis, 'postMessage', {
     configurable: true,
     // ensure `this` is not used
-    // eslint-disable-next-line
-    value: (msg: WorkerEvent) => (mockSelf as any).postMessage(msg),
+    value: (msg: WorkerEvent) => mockSelf.postMessage(msg),
   });
 }
 
@@ -89,23 +88,22 @@ describe('counterWorker', () => {
     messages.length = 0;
 
     send({ type: 'INPUT_NUMBER', value: 8n });
-    // eslint-disable-next-line
-    expect(messages.some((m) => m.type === 'FIB_ALERT' && (m as any).value === 8n)).toBe(true);
+    expect(messages.some((m) => m.type === 'FIB_ALERT' && m.value === 8n)).toBe(true);
   });
 
   it('INPUT_NUMBER ignores non-integers (no count increment, no alerts)', () => {
     send({ type: 'START' });
     messages.length = 0;
-    // eslint-disable-next-line
-    send({ type: 'INPUT_NUMBER', value: 3.14 as any });
+    send({ type: 'INPUT_NUMBER', value: 3.14 as unknown as bigint });
 
     // No messages should have been posted for a non-integer input
     expect(messages.length).toBe(0);
 
     // Request a snapshot to verify totals are unchanged (still zero)
     send({ type: 'REQUEST_SNAPSHOT' });
-    // eslint-disable-next-line
-    const snap = (messages.at(-1)! as any).payload as Snapshot;
+    const lastSnap = messages.at(-1)!;
+    if (lastSnap.type !== 'SNAPSHOT') throw new Error('Expected SNAPSHOT');
+    const snap = lastSnap.payload;
     expect(snap.totalInputs).toBe(0);
   });
 
@@ -120,11 +118,11 @@ describe('counterWorker', () => {
 
     // Ask for a snapshot to assert count incremented
     send({ type: 'REQUEST_SNAPSHOT' });
-    // eslint-disable-next-line
-    const snap = (messages.at(-1)! as any).payload as Snapshot;
+    const lastSnap2 = messages.at(-1)!;
+    if (lastSnap2.type !== 'SNAPSHOT') throw new Error('Expected SNAPSHOT');
+    const snap = lastSnap2.payload;
     expect(snap.totalInputs).toBe(1);
-    // eslint-disable-next-line
-    expect(snap.top.some((x: any) => x.value === 4n && x.count === 1)).toBe(true);
+    expect(snap.top.some((x: { value: bigint; count: number }) => x.value === 4n && x.count === 1)).toBe(true);
   });
 
   it('HALT and RESUME toggle running state in subsequent SNAPSHOTs', () => {
@@ -133,14 +131,14 @@ describe('counterWorker', () => {
     send({ type: 'HALT' });
     let last = messages.at(-1)!;
     expect(last.type).toBe('SNAPSHOT');
-    // eslint-disable-next-line
-    expect((last as any).payload.running).toBe(false);
+    if (last.type !== 'SNAPSHOT') throw new Error('Expected SNAPSHOT');
+    expect(last.payload.running).toBe(false);
 
     send({ type: 'RESUME' });
     last = messages.at(-1)!;
     expect(last.type).toBe('SNAPSHOT');
-    // eslint-disable-next-line
-    expect((last as any).payload.running).toBe(true);
+    if (last.type !== 'SNAPSHOT') throw new Error('Expected SNAPSHOT');
+    expect(last.payload.running).toBe(true);
   });
 
   it('REQUEST_SNAPSHOT returns a SNAPSHOT without changing state', () => {

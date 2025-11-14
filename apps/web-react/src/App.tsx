@@ -12,7 +12,19 @@ export default function App() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [intervalStr, setIntervalStr] = useState('1');
 
-  const { snapshot, lastFib, lastFibTick, quitAckTick, inputNumber, halt, resume, refresh, quit, running, setIntervalMs } = useCounterWorker();
+  const {
+    snapshot,
+    lastFib,
+    lastFibTick,
+    quitAckTick,
+    inputNumber,
+    halt,
+    resume,
+    refresh,
+    quit,
+    running,
+    setIntervalMs
+  } = useCounterWorker();
 
   const [showFarewell, setShowFarewell] = useState(false);
 
@@ -67,7 +79,7 @@ export default function App() {
     }
   }
 
-  const farewellTable = <FrequencyTable rows={snapshot?.top ?? []} />;
+  const farewellTable = <FrequencyTable rows={snapshot?.top ?? []}/>;
 
   return (
     <div style={{ maxWidth: 900, margin: '40px auto', padding: 16 }}>

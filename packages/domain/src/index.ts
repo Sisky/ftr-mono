@@ -1,5 +1,11 @@
 export type CountRow = { value: bigint; count: number; }
 
+export function compareBigInts(leftValue: bigint, rightValue: bigint): number {
+    if (leftValue < rightValue) return -1;
+    if (leftValue > rightValue) return 1;
+    return 0;
+}
+
 /**
  * Build a Set containing the first `count` Fibonacci numbers.
  *
@@ -112,10 +118,8 @@ export class Counter {
                 return rightCount - leftCount;
             }
 
-            // BigInt comparison: cannot subtract; use conditional
-            if (leftValue < rightValue) return -1;
-            if (leftValue > rightValue) return 1;
-            return 0;
+            // cannot subtract. use helper for code coverage
+            return compareBigInts(leftValue, rightValue);
         });
 
         const visiblePairs = clampedLimit >= total ? pairs : pairs.slice(0, clampedLimit);

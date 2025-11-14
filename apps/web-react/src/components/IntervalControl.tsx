@@ -1,3 +1,5 @@
+import { getIntervalBlurUpdate } from "../utils/intervalUtils";
+
 interface IntervalControlProps {
   intervalStr: string;
   setIntervalStr: (value: string) => void;
@@ -7,7 +9,8 @@ interface IntervalControlProps {
 export default function IntervalControl(props: IntervalControlProps) {
   const { intervalStr, setIntervalStr, setIntervalMs } = props;
 
-  const n = Number(intervalStr);
+  const sanitizedStr = intervalStr.replace(/\s+/g, '');
+  const n = Number(sanitizedStr);
   const isInteger = Number.isInteger(n);
   const isValid = Number.isFinite(n) && isInteger && n >= 1;
 
@@ -41,25 +44,21 @@ export default function IntervalControl(props: IntervalControlProps) {
             }
           }}
           onChange={(e) => {
-            const v = e.target.value;
-            setIntervalStr(v);
-            const n2 = Number(v);
+            const raw = e.target.value;
+            const next = raw.replace(/\s+/g, '');
+
+            setIntervalStr(next);
+            const n2 = Number(next);
             if (Number.isFinite(n2) && n2 >= 1) {
-              // Convert seconds to milliseconds for the worker (floor fractional seconds)
               setIntervalMs(Math.floor(n2 * 1000));
             }
           }}
           onBlur={() => {
-            // Normalize/clamp on blur so negatives or invalid values can't persist
-            const current = Number(intervalStr);
-            if (!(Number.isFinite(current) && Number.isInteger(current) && current >= 1)) {
-              setIntervalStr('1');
-              setIntervalMs(1000);
-            } else if (current !== Math.floor(current)) {
-              const floored = Math.floor(current);
-              setIntervalStr(String(floored));
-              setIntervalMs(floored * 1000);
-            }
+            const update = getIntervalBlurUpdate(intervalStr);
+            if (!update) return;
+
+            setIntervalStr(update.intervalStr);
+            setIntervalMs(update.intervalMs);
           }}
           style={{
             width: 100,

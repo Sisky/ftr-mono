@@ -3,6 +3,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
+// Helpers to manipulate global BigInt without using `any`
+const getGlobalBigInt = () => (globalThis as unknown as { BigInt: typeof BigInt }).BigInt;
+const defineGlobalBigInt = (value: typeof BigInt) => {
+  Reflect.defineProperty(globalThis as object, 'BigInt', {
+    value,
+    configurable: true,
+    writable: true,
+  });
+};
+
 type SnapshotRow = {
   value: number;
   count: number;
@@ -175,6 +185,48 @@ describe('App', () => {
 
     // FrequencyTable should fall back to [] and show the empty state
     expect(screen.getByText(/No inputs yet\./i)).toBeInTheDocument();
+  });
+
+  it('does not submit when BigInt throws inside submit handler (branch coverage)', () => {
+    render(<App/>);
+
+    const input = screen.getByPlaceholderText(/enter an integer/i) as HTMLInputElement;
+    const addButton = screen.getByRole('button', { name: /add/i });
+
+    // type a valid-looking integer so regex validation passes using the real BigInt
+    fireEvent.change(input, { target: { value: '123' } });
+
+    const originalBigInt = getGlobalBigInt();
+    try {
+      defineGlobalBigInt((() => { throw new Error('boom'); }) as unknown as typeof BigInt);
+
+      fireEvent.click(addButton);
+
+      expect(mockInputNumber).not.toHaveBeenCalled();
+      expect(input.value).toBe('123');
+    } finally {
+      defineGlobalBigInt(originalBigInt);
+    }
+  });
+
+  it('shows BigInt-specific validation message when BigInt throws for valid-looking input (branch coverage)', () => {
+    const originalBigInt = getGlobalBigInt();
+    try {
+      defineGlobalBigInt((() => { throw new Error('boom'); }) as unknown as typeof BigInt);
+
+      render(<App/>);
+
+      const input = screen.getByPlaceholderText(/enter an integer/i) as HTMLInputElement;
+      fireEvent.change(input, { target: { value: '456' } });
+
+      expect(screen.getByRole('alert')).toHaveTextContent('Please enter a valid integer value.');
+
+      const addButton = screen.getByRole('button', { name: /add/i });
+      fireEvent.click(addButton);
+      expect(mockInputNumber).not.toHaveBeenCalled();
+    } finally {
+      defineGlobalBigInt(originalBigInt);
+    }
   });
 });
 

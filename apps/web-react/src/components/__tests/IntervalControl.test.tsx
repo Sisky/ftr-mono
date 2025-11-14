@@ -76,4 +76,110 @@ describe('IntervalControl', () => {
     expect(setIntervalStr).toHaveBeenCalledWith('');
     expect(setIntervalMs).not.toHaveBeenCalled();
   });
+
+  it('prevents disallowed keys in onKeyDown and allows digits', () => {
+    const { input } = renderWithMocks('5');
+
+    const badKeys = ['e', 'E', '+', '-', '.'] as const;
+    for (const key of badKeys) {
+      fireEvent.keyDown(input, { key });
+    }
+
+    fireEvent.keyDown(input, { key: '3' });
+  });
+
+  it('sanitizes pasted text to digits-only', () => {
+    const { input, setIntervalStr } = renderWithMocks('5');
+
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: (type: string) => {
+          void type;
+          return '12x3';
+        },
+      },
+    });
+
+    expect(setIntervalStr).toHaveBeenCalledWith('123');
+  });
+
+  it('allows clean digit-only paste without interception', () => {
+    const { input, setIntervalStr } = renderWithMocks('5');
+
+    const prevent = vi.fn();
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: (type: string) => {
+          void type;
+          return '999';
+        },
+      },
+      preventDefault: prevent,
+    });
+
+    expect(prevent).not.toHaveBeenCalled();
+    // no immediate setIntervalStr call from onPaste when text is clean
+    expect(setIntervalStr).not.toHaveBeenCalled();
+  });
+
+  it('clears on paste when text has no digits', () => {
+    const { input, setIntervalStr } = renderWithMocks('5');
+
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: (type: string) => {
+          void type;
+          return 'abc';
+        },
+      },
+    });
+
+    // No digits, cleared
+    expect(setIntervalStr).toHaveBeenCalledWith('');
+  });
+
+  it('onBlur clamps invalid to 1s (string "1") and 1000ms', () => {
+    const { input, setIntervalStr, setIntervalMs } = renderWithMocks('0');
+
+    fireEvent.blur(input);
+
+    expect(setIntervalStr).toHaveBeenCalledWith('1');
+    expect(setIntervalMs).toHaveBeenCalledWith(1000);
+  });
+
+  it('onBlur floors fractional seconds to an integer', () => {
+    const setIntervalStr = vi.fn();
+    const setIntervalMs = vi.fn();
+    const { getByLabelText } = render(
+      <IntervalControl
+        intervalStr="2.5"
+        setIntervalStr={setIntervalStr}
+        setIntervalMs={setIntervalMs}
+      />
+    );
+
+    const input = getByLabelText(/Interval \(s\)/i);
+    fireEvent.blur(input);
+
+    expect(setIntervalStr).toHaveBeenCalledWith('2');
+    expect(setIntervalMs).toHaveBeenCalledWith(2000);
+  });
+
+  it('onBlur normalizes whitespace for valid integers', () => {
+    const { input, setIntervalStr, setIntervalMs } = renderWithMocks('  3  ');
+
+    fireEvent.blur(input);
+
+    expect(setIntervalStr).toHaveBeenCalledWith('3');
+    expect(setIntervalMs).toHaveBeenCalledWith(3000);
+  });
+
+  it('onBlur does nothing when update is null (clean integer)', () => {
+    const { input, setIntervalStr, setIntervalMs } = renderWithMocks('10');
+
+    fireEvent.blur(input);
+
+    expect(setIntervalStr).not.toHaveBeenCalled();
+    expect(setIntervalMs).not.toHaveBeenCalled();
+  });
 });

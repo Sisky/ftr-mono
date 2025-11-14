@@ -20,7 +20,11 @@ export default function ControlsBar(props: ControlsBarProps) {
       <input
         ref={inputRef}
         value={String(input)}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={(e) => {
+          const raw = e.target.value;
+          const sanitized = raw.replace(/\s+/g, '');
+          setInput(sanitized);
+        }}
         onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
         placeholder="Enter an integer…"
         inputMode="numeric"

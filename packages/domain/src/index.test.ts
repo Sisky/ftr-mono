@@ -1,4 +1,4 @@
-import { Counter, makeFibonacciSet } from './index';
+import { Counter, makeFibonacciSet, compareBigInts } from './index';
 import { describe, expect, test } from 'vitest';
 
 describe('Counter', () => {
@@ -62,6 +62,14 @@ describe('Counter', () => {
   test('snapshot on empty counter returns []', () => {
     const c = new Counter();
     expect(c.snapshot()).toEqual([]);
+  });
+});
+
+describe('compareBigInts', () => {
+  test('returns -1, 1, 0 appropriately', () => {
+    expect(compareBigInts(1n, 2n)).toBe(-1);
+    expect(compareBigInts(2n, 1n)).toBe(1);
+    expect(compareBigInts(5n, 5n)).toBe(0); // this hits the return 0 branch
   });
 });
 
