@@ -100,7 +100,6 @@ describe('makeFibSet', () => {
 
   test('1001st fib number', () => {
     const s = makeFibonacciSet(1000);
-    console.log(s);
     // https://www.bigprimes.net/archive/fibonacci/1001/
     const fib = '70 330 367 711 422 815 821 835 254 877 183 549 770 181 269 836 358 732 742 604 905 087 154 537 118 196 933 579 742 249 494 562 611 733 487 750 449 241 765 991 088 186 363 265 450 223 647 106 012 053 374 121 273 867 339 111 198 139 373 125 598 767 690 091 902 245 245 323 403 501';
     const fibBigInt = BigInt(fib.replace(/\s+/g, ''));

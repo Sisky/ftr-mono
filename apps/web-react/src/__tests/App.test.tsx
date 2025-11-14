@@ -95,7 +95,7 @@ describe('App', () => {
     fireEvent.change(input, { target: { value: '42' } });
     fireEvent.click(addButton);
 
-    expect(mockInputNumber).toHaveBeenCalledWith(42);
+    expect(mockInputNumber).toHaveBeenCalledWith(42n);
 
     expect(input.value).toBe('');
 
@@ -128,8 +128,7 @@ describe('App', () => {
     fireEvent.change(input, { target: { value: '9007199254740993' } });
     fireEvent.click(addButton);
 
-    // For now the UI sends Number(str) downstream
-    expect(mockInputNumber).toHaveBeenCalledWith(Number('9007199254740993'));
+    expect(mockInputNumber).toHaveBeenCalledWith(9007199254740993n);
 
     // Input clears on success and no alert is shown
     expect(input.value).toBe('');

@@ -34,7 +34,7 @@ describe('@ftr-mono/protocol types', () => {
         expect(halt.type).toBe('HALT');
         expect(resume.type).toBe('RESUME');
         expect(quit.type).toBe('QUIT');
-        expect(input.value).toBe(123);
+        expect(input.value).toBe(123n);
         expect(request.type).toBe('REQUEST_SNAPSHOT');
         expect(setIntervalCmd.ms).toBe(250);
     });
@@ -66,7 +66,7 @@ describe('@ftr-mono/protocol types', () => {
         expect(typeof s.running).toBe('boolean');
         expect(typeof s.totalInputs).toBe('number');
         expect(Array.isArray(s.top)).toBe(true);
-        expect(s.top[0]).toEqual({ value: 2, count: 3 });
+        expect(s.top[0]).toEqual({ value: 2n, count: 3 });
         expect(typeof s.lastUpdated).toBe('number');
     });
 

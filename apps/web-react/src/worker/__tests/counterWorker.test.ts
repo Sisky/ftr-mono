@@ -5,7 +5,7 @@ type Command =
   | { type: 'HALT' }
   | { type: 'RESUME' }
   | { type: 'QUIT' }
-  | { type: 'INPUT_NUMBER'; value: number }
+  | { type: 'INPUT_NUMBER'; value: bigint }
   | { type: 'REQUEST_SNAPSHOT' }
   | { type: 'SET_INTERVAL'; ms: number }
   | { type: string; [k: string]: unknown };
@@ -13,13 +13,13 @@ type Command =
 type Snapshot = {
   running: boolean;
   totalInputs: number;
-  top: Array<{ value: number; count: number }>;
+  top: Array<{ value: bigint; count: number }>;
   lastUpdated: number;
 };
 
 type WorkerEvent =
   | { type: 'SNAPSHOT'; payload: Snapshot }
-  | { type: 'FIB_ALERT'; value: number }
+  | { type: 'FIB_ALERT'; value: bigint }
   | { type: 'QUIT_ACK' };
 
 let messages: WorkerEvent[] = [];
@@ -88,15 +88,15 @@ describe('counterWorker', () => {
     send({ type: 'START' });
     messages.length = 0;
 
-    send({ type: 'INPUT_NUMBER', value: 8 });
-// eslint-disable-next-line
-    expect(messages.some((m) => m.type === 'FIB_ALERT' && (m as any).value === 8)).toBe(true);
+    send({ type: 'INPUT_NUMBER', value: 8n });
+    // eslint-disable-next-line
+    expect(messages.some((m) => m.type === 'FIB_ALERT' && (m as any).value === 8n)).toBe(true);
   });
 
   it('INPUT_NUMBER ignores non-integers (no count increment, no alerts)', () => {
     send({ type: 'START' });
     messages.length = 0;
-// eslint-disable-next-line
+    // eslint-disable-next-line
     send({ type: 'INPUT_NUMBER', value: 3.14 as any });
 
     // No messages should have been posted for a non-integer input
@@ -113,7 +113,7 @@ describe('counterWorker', () => {
     send({ type: 'START' });
     messages.length = 0;
 
-    send({ type: 'INPUT_NUMBER', value: 4 }); // 4 is not Fibonacci
+    send({ type: 'INPUT_NUMBER', value: 4n }); // 4 is not Fibonacci
 
     // Should not produce any FIB_ALERT
     expect(messages.some((m) => m.type === 'FIB_ALERT')).toBe(false);
@@ -124,7 +124,7 @@ describe('counterWorker', () => {
     const snap = (messages.at(-1)! as any).payload as Snapshot;
     expect(snap.totalInputs).toBe(1);
     // eslint-disable-next-line
-    expect(snap.top.some((x: any) => x.value === 4 && x.count === 1)).toBe(true);
+    expect(snap.top.some((x: any) => x.value === 4n && x.count === 1)).toBe(true);
   });
 
   it('HALT and RESUME toggle running state in subsequent SNAPSHOTs', () => {
@@ -163,7 +163,7 @@ describe('counterWorker', () => {
 
   it('QUIT stops and clears, then QUIT_ACK is posted and subsequent snapshot shows totals reset', () => {
     send({ type: 'START' });
-    send({ type: 'INPUT_NUMBER', value: 5 });
+    send({ type: 'INPUT_NUMBER', value: 5n });
 
     messages.length = 0;
     send({ type: 'QUIT' });

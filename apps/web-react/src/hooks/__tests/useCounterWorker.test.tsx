@@ -160,7 +160,7 @@ describe('useCounterWorker', () => {
       top: [],
       lastUpdated: 999,
     });
-    expect(result.current.lastFib).toBe(21);
+    expect(result.current.lastFib).toBe(21n);
     expect(result.current.quitAckTick).toBe(prevTick + 1);
 
     // Should not request a new snapshot automatically
